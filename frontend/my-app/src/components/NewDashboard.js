@@ -9,7 +9,7 @@ const NewDashboard = () => {
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
-        const response = await axios.get('http://15.206.159.215/:8000/api/company-details/');
+        const response = await axios.get('http://15.206.159.215:8000/api/company-details/');
         setCompanyData(response.data);
       } catch (error) {
         console.error('Error fetching company data:', error);
