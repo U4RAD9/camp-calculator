@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Company,Camp,ServiceSelection,TestData,PriceRange,Service,CostDetails,ServiceCost,CostSummary
+from .models import Company,Camp,ServiceSelection,TestData,PriceRange,Service,CostDetails,ServiceCost,CostSummary,CopyPrice,CompanyDetails,ServiceDetails,User
 
 class CampSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,3 +61,37 @@ class CostSummarySerializer(serializers.ModelSerializer):
         model = CostSummary
         fields = '__all__'
 
+class CopyPriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=CopyPrice
+        fields = '__all__'
+
+
+class ServiceDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceDetails
+        fields = ['service_name', 'total_cases']
+
+class CompanyDetailsSerializer(serializers.ModelSerializer):
+    services = ServiceDetailsSerializer(many=True)
+
+    class Meta:
+        model = CompanyDetails
+        fields = ['company_name', 'grand_total', 'services']
+
+    def create(self, validated_data):
+        services_data = validated_data.pop('services')
+        company = CompanyDetails.objects.create(**validated_data)
+        for service_data in services_data:
+            ServiceDetails.objects.create(company=company, **service_data)
+        return company
+    
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+   
+      

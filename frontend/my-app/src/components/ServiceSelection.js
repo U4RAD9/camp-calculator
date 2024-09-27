@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function ServiceSelection({ companyId, onNext, onBack, userType }) {
+function ServiceSelection({ companyId, onNext,userType }) {
   const [selectedServices, setSelectedServices] = useState([]);
   const [pathologyOptions, setPathologyOptions] = useState([]);
 
@@ -16,7 +16,9 @@ function ServiceSelection({ companyId, onNext, onBack, userType }) {
   ];
 
   const pathologySubServices = [
-    'CBC','Complete Hemogram','Hemoglobin','Urine Routine','Stool Examination','Lipid Profile','Kidney Profile','LFT','KFT','Random Blood Glucose','Blood Grouping'
+    'CBC', 'Complete Hemogram', 'Hemoglobin', 'Urine Routine',
+    'Stool Examination', 'Lipid Profile', 'Kidney Profile', 
+    'LFT', 'KFT', 'Random Blood Glucose', 'Blood Grouping'
   ];
 
   const handleServiceChange = (service) => {
@@ -64,55 +66,56 @@ function ServiceSelection({ companyId, onNext, onBack, userType }) {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl mb-4">Select Services</h2>
-      <div className="space-y-2">
-        {services.map(service => (
-          <div key={service}>
-            <input
-              type="checkbox"
-              id={service}
-              value={service}
-              checked={selectedServices.includes(service)}
-              onChange={() => handleServiceChange(service)}
-            />
-            <label htmlFor={service} className="ml-2">{service}</label>
-          </div>
-        ))}
-      </div>
-
-      {selectedServices.includes('Pathology') && (
-        <div className="mt-4">
-          <h3 className="text-xl mb-2">Select Pathology Sub-Services</h3>
-          <div className="space-y-2">
-            {pathologySubServices.map(option => (
-              <div key={option}>
-                <input
-                  type="checkbox"
-                  id={option}
-                  value={option}
-                  checked={pathologyOptions.includes(option)}
-                  onChange={() => handlePathologyOptionChange(option)}
-                />
-                <label htmlFor={option} className="ml-2">{option}</label>
-              </div>
-            ))}
-          </div>
+    <div className="bg-gradient-to-r from-blue-200 to-blue-400 min-h-screen flex items-center justify-center">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">Select Services</h2>
+        
+        <div className="space-y-4">
+          {services.map(service => (
+            <div key={service} className="flex items-center">
+              <input
+                type="checkbox"
+                id={service}
+                value={service}
+                checked={selectedServices.includes(service)}
+                onChange={() => handleServiceChange(service)}
+                className="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring focus:ring-blue-500"
+              />
+              <label htmlFor={service} className="ml-2 text-lg">{service}</label>
+            </div>
+          ))}
         </div>
-      )}
 
-      <button
-        onClick={handleSave}
-        className="mt-4 p-2 bg-blue-500 text-white"
-      >
-        Save and Next
-      </button>
-      <button
-        onClick={onBack}
-        className="mt-4 ml-4 p-2 bg-gray-500 text-white"
-      >
-        Back
-      </button>
+        {selectedServices.includes('Pathology') && (
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2">Select Pathology Sub-Services</h3>
+            <div className="space-y-2">
+              {pathologySubServices.map(option => (
+                <div key={option} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={option}
+                    value={option}
+                    checked={pathologyOptions.includes(option)}
+                    onChange={() => handlePathologyOptionChange(option)}
+                    className="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring focus:ring-blue-500"
+                  />
+                  <label htmlFor={option} className="ml-2">{option}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between mt-6">
+          <button
+            onClick={handleSave}
+            className="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700 transition duration-300"
+          >
+            Save and Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

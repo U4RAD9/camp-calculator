@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Service, PriceRange,TestType,ServiceCost
 from .models import Company,Camp,ServiceSelection,TestData,CostDetails
 from .models import DiscountCoupon
-from .models import Estimation,CostSummary
+from .models import Estimation,CostSummary,CopyPrice,User
 
 class PriceRangeInline(admin.TabularInline):
     model = PriceRange
@@ -79,3 +79,13 @@ class CostSummaryAdmin(admin.ModelAdmin):
     list_display = ('company_name', 'billing_number', 'grand_total', 'created_at')
     search_fields = ('company_name', 'billing_number')
     list_filter = ('created_at',)
+
+
+
+@admin.register(CopyPrice)
+class CopyPriceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'hard_copy_price')
+    search_fields = ('name',)
+
+
+admin.site.register(User)

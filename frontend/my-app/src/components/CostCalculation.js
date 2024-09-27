@@ -85,7 +85,7 @@ const serviceCalculationRules = {
   
 };
 
-function CostCalculation({ caseData, onSubmit, onBack, companyId }) {
+function CostCalculation({ caseData, onSubmit,companyId }) {
   const [costDetails, setCostDetails] = useState({});
   const [initialized, setInitialized] = useState(false);
 
@@ -129,7 +129,7 @@ function CostCalculation({ caseData, onSubmit, onBack, companyId }) {
           reportTypeCost,
           totalCase,
           numberOfDays,
-          tPrice: ['CBC', 'Complete Hemogram','Hemoglobin','Urine Routine','Stool Examination','Lipid Profile','Kidney Profile','LFT','KFT','Random Blood Glucose','Blood Grouping'].includes(service) ? costDetails[service]?.reporting || 0 : undefined,
+          tPrice: ['CBC', 'Complete Hemogram','Hemoglobin','Urine Routine','Stool Examination','Lipid Profile','Kidney Profile','LFT','KFT','Random Blood Glucose','Blood Grouping'].includes(service) ? costDetails[service]?.reporting +reportTypeCost|| 0 : undefined,
         };
       });
       setCostDetails(initialDetails);
@@ -153,7 +153,7 @@ function CostCalculation({ caseData, onSubmit, onBack, companyId }) {
       const rules = serviceCalculationRules[testType] || serviceCalculationRules['default'];
 
       if (['CBC', 'Complete Hemogram','Hemoglobin','Urine Routine','Stool Examination','Lipid Profile','Kidney Profile','LFT','KFT','Random Blood Glucose','Blood Grouping'].includes(testType)) {
-        const tPrice = costDetails[testType]?.reporting|| 0; // Editable total price for CBC and Complete Hemogram
+        const tPrice = costDetails[testType]?.reporting +costDetails[testType]?.reportTypeCost|| 0; // Editable total price for CBC and Complete Hemogram
         details[testType] = {
           salary: 0,
           incentive: 0,
@@ -295,12 +295,6 @@ function CostCalculation({ caseData, onSubmit, onBack, companyId }) {
           </tbody>
         </table>
         <div className="flex justify-between mt-4">
-          <button
-            onClick={onBack}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
-          >
-            Back
-          </button>
           <button
             onClick={handleSubmit}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"

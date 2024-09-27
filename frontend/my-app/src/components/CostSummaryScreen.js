@@ -13,6 +13,7 @@ function CostSummaryScreen({ caseData, costDetails, campDetails, companyId,onSub
         }
         return parseInt(storedCounter, 10);
     };
+    console.log(campDetails)
 
     const setBillingCounter = (counter) => {
         localStorage.setItem('billingCounter', counter);
@@ -87,77 +88,142 @@ function CostSummaryScreen({ caseData, costDetails, campDetails, companyId,onSub
     // Generate and download the PDF
     const handleDownloadComprehensivePDF = () => {
         const doc = new jsPDF();
+        // Initialize doc and add title with underline
+const billingNumber = generateBillingNumber();
+doc.setFontSize(12);
+doc.setTextColor(0, 0, 0);
 
-        // Billing Number
-        const billingNumber = generateBillingNumber();
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Billing Number: ${billingNumber}`, 14, 35);
+// Title
+doc.setFontSize(20);
+doc.setTextColor(0, 51, 153); // Dark blue color for title
+doc.text('U4RAD CAMP ESTIMATION', 105, 25, { align: 'center' });
+doc.setLineWidth(1);
+doc.line(50, 28, 160, 28); // Short underline below the title
 
-        // Title
-        doc.setFontSize(24);
-        doc.setTextColor(0, 0, 102);
-        doc.text('ESTIMATION', 105, 22, { align: 'center' });
-        doc.setLineWidth(1);
-        doc.line(14, 28, 200, 28); // Horizontal line
+// Billing Number
+doc.setFontSize(12);
+doc.setTextColor(50, 50, 50); // Gray text
+doc.text(`Billing Number: ${billingNumber}`, 14, 35);
 
-        // Company Details
-        doc.setFontSize(14);
-        const { companyName, companyState, companyDistrict, companyPinCode, companyLandmark, companyAddress } = campDetails;
+// Section: Company Details (Title with underline)
+doc.setFontSize(16);
+doc.setTextColor(0, 51, 153);
+doc.text('Company Details', 14, 50);
+doc.setLineWidth(0.5);
+doc.line(14, 52, 200, 52); // Underline under section title
 
-        let positionY = 45;
-        if (companyName) {
-            doc.text(`Company Name: ${companyName}`, 14, positionY);
-            positionY += 10;
+// Company details - grid layout
+doc.setFontSize(11);
+doc.setTextColor(0, 0, 0);
+let positionY = 60; // Starting point for company details
+
+const { companyName, companyState, companyDistrict, companyPinCode, companyLandmark, companyAddress } = campDetails;
+
+if (companyName) {
+    doc.setFont("helvetica", "bold");
+    doc.text('Company Name:', 14, positionY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${companyName}`, 50, positionY);
+    positionY += 7;
+}
+
+if (companyState || companyDistrict || companyPinCode) {
+    doc.setFont("helvetica", "bold");
+    doc.text('State:', 14, positionY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${companyState || 'N/A'}`, 50, positionY); // State value
+
+    doc.setFont("helvetica", "bold");
+    doc.text('District:', 100, positionY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${companyDistrict || 'N/A'}`, 130, positionY); // District value
+
+    positionY += 7;
+
+    doc.setFont("helvetica", "bold");
+    doc.text('Pin Code:', 14, positionY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${companyPinCode || 'N/A'}`, 50, positionY); // Pin code value
+    positionY += 7;
+}
+
+if (companyAddress || companyLandmark) {
+    doc.setFont("helvetica", "bold");
+    doc.text('Address:', 14, positionY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${companyAddress || 'N/A'}`, 50, positionY);
+
+    positionY += 7;
+    if (companyLandmark) {
+        doc.setFont("helvetica", "bold");
+        doc.text('Landmark:', 14, positionY);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${companyLandmark}`, 50, positionY);
+    }
+    positionY += 7;
+}
+
+// Add line separator before the next section
+doc.setLineWidth(0.5);
+doc.line(14, positionY + 5, 200, positionY + 5);
+positionY += 10; // Adjust position after the line
+
+// Section: Camp Locations & Dates
+doc.setFontSize(16);
+doc.setTextColor(0, 51, 153);
+doc.text('Camp Locations & Dates', 14, positionY);
+doc.setLineWidth(0.5);
+doc.line(14, positionY + 2, 200, positionY + 2); // Underline for section title
+
+positionY += 10;
+doc.setFontSize(11);
+doc.setTextColor(0, 0, 0);
+
+const locations = campDetails.camps || [];
+if (locations.length > 0) {
+    locations.forEach((camp, idx) => {
+        const startDateStr = new Date(camp.startDate).toDateString();
+        const endDateStr = new Date(camp.endDate).toDateString();
+        const { campLocation, campState, campDistrict, campPinCode } = camp;
+
+        // Add grid layout for camp details
+        doc.setFont("helvetica", "bold");
+        doc.text('Location:', 14, positionY);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${campLocation}`, 50, positionY);
+
+        doc.setFont("helvetica", "bold");
+        doc.text('State:', 100, positionY);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${campState}`, 130, positionY);
+
+        positionY += 7;
+        doc.setFont("helvetica", "bold");
+        doc.text('District:', 14, positionY);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${campDistrict}`, 50, positionY);
+
+        doc.setFont("helvetica", "bold");
+        doc.text('Pin Code:', 100, positionY);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${campPinCode}`, 130, positionY);
+
+        positionY += 7;
+        doc.setFont("helvetica", "bold");
+        doc.text('Camp Dates:', 14, positionY);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${startDateStr} - ${endDateStr}`, 50, positionY);
+        positionY += 10;
+
+        if (positionY > doc.internal.pageSize.height - 40) {
+            doc.addPage();
+            positionY = 20;
         }
-        if (companyState) {
-            doc.text(`State: ${companyState}`, 14, positionY);
-            positionY += 10;
-        }
-        if (companyDistrict) {
-            doc.text(`District: ${companyDistrict}`, 14, positionY);
-            positionY += 10;
-        }
-        if (companyPinCode) {
-            doc.text(`Pin Code: ${companyPinCode}`, 14, positionY);
-            positionY += 10;
-        }
-        if (companyLandmark) {
-            doc.text(`Landmark: ${companyLandmark}`, 14, positionY);
-            positionY += 10;
-        }
-        if (companyAddress) {
-            doc.text(`Company Address: ${companyAddress}`, 14, positionY);
-            positionY += 10;
-        }
-
-        // Camp Locations & Dates
-        doc.setFontSize(12);
-        doc.text('Camp Locations & Dates:', 14, positionY);
-        doc.setFontSize(10);
-
-        const locations = campDetails.camps || [];
-        if (locations.length > 0) {
-            locations.forEach((camp, idx) => {
-                const startDateStr = new Date(camp.startDate).toDateString();
-                const endDateStr = new Date(camp.endDate).toDateString();
-                const { campLocation, campState, campDistrict } = camp;
-
-                positionY += 8;
-                if (positionY > doc.internal.pageSize.height - 40) {
-                    doc.addPage();
-                    positionY = 20;
-                }
-                doc.text(
-                    `- Location: ${campLocation}, State: ${campState}, District: ${campDistrict}, Dates: ${startDateStr} to ${endDateStr}`,
-                    20,
-                    positionY
-                );
-            });
-        } else {
-            doc.text('No camp locations provided.', 20, positionY);
-        }
-
+    });
+} else {
+    doc.text('No camp locations provided.', 20, positionY);
+}
+  
         // Table for Services
         const serviceRows = Object.keys(caseData).map((service) => {
             const { totalCase } = caseData[service];
@@ -194,22 +260,8 @@ function CostSummaryScreen({ caseData, costDetails, campDetails, companyId,onSub
         doc.setTextColor(0, 0, 0);
         doc.text(`Grand Total: ${grandTotal.toLocaleString()}`, 14, doc.autoTable.previous.finalY + 10);
 
-        // Footer with Quotes
-        const quotes = [
-            "“The only way to do great work is to love what you do.” – Steve Jobs",
-            "“Success is not the key to happiness. Happiness is the key to success. If you love what you are doing, you will be successful.” – Albert Schweitzer",
-            "“You don’t have to be great to start, but you have to start to be great.” – Zig Ziglar",
-            "“Success usually comes to those who are too busy to be looking for it.” – Henry David Thoreau"
-        ];
-        doc.setFontSize(10);
-        doc.setTextColor(0, 51, 102);
-        doc.text(quotes[Math.floor(Math.random() * quotes.length)], 14, doc.internal.pageSize.height - 30, {
-            align: 'center',
-            maxWidth: 180
-        });
-
         // Save the PDF
-        doc.save(`Estimation_${billingNumber}.pdf`);
+        doc.save(`U4RAD CAMP Estimation_${billingNumber}.pdf`);
     };
 
     // Handle form submission
@@ -289,9 +341,8 @@ function CostSummaryScreen({ caseData, costDetails, campDetails, companyId,onSub
                     onClick={handleSubmit}
                     className="bg-green-500 text-white py-2 px-4 rounded shadow hover:bg-green-700"
                 >
-                    Submit
+                    Save in dashboard
                 </button>
-                
             </div>
         </div>
     );

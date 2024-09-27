@@ -6,6 +6,7 @@ from .views import validate_coupon
 from .views import PDFUploadView
 from .views import generate_pdf_view
 from .views import CostSummaryViewSet
+from .views import CopyPriceViewSet,CompanyDetailsViewSet,UserViewSet
 
 
 router = DefaultRouter()
@@ -20,6 +21,10 @@ router.register(r'cost_details', CostDetailsViewSet, basename='cost_details')
 
 router.register(r'service_costs', ServiceCostViewSet)
 router.register(r'costsummaries', CostSummaryViewSet)
+router.register(r'copyprice',CopyPriceViewSet)
+router.register(r'company-details', CompanyDetailsViewSet)
+router.register(r'users', UserViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -27,4 +32,5 @@ urlpatterns = [
     path('api/validate-coupon/<str:code>/', validate_coupon, name='validate_coupon'),
     path('upload-pdf/', PDFUploadView.as_view(), name='upload_pdf'),
     path('view-pdf/<int:pk>/', generate_pdf_view, name='view_pdf'),
+
 ]

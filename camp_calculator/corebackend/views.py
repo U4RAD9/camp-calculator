@@ -1,9 +1,9 @@
 from django.shortcuts import render
-
+from django.contrib.auth import authenticate
 # Create your views here.
 from rest_framework import viewsets
-from .models import Company,Camp,ServiceSelection,TestData,Service,CostDetails,TestType,ServiceCost,CostSummary
-from .serializers import CampSerializer,CompanySerializer,ServiceSelectionSerializer,TestCaseDataSerializer,ServiceSerializer,CostDetailsSerializer,ServiceCostSerializer,CostSummarySerializer
+from .models import Company,Camp,ServiceSelection,TestData,Service,CostDetails,TestType,ServiceCost,CostSummary,CopyPrice,CompanyDetails,User
+from .serializers import CampSerializer,CompanySerializer,ServiceSelectionSerializer,TestCaseDataSerializer,ServiceSerializer,CostDetailsSerializer,ServiceCostSerializer,CostSummarySerializer,CopyPriceSerializer,CompanyDetailsSerializer,UserSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -24,6 +24,8 @@ from django.conf import settings
 import os
 from reportlab.pdfgen import canvas
 from django.core.files import File
+from django.core.mail import send_mail
+from django.core.cache import cache
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -180,3 +182,24 @@ def generate_pdf_view(request):
 class CostSummaryViewSet(viewsets.ModelViewSet):
     queryset = CostSummary.objects.all()
     serializer_class = CostSummarySerializer
+
+
+
+
+class CopyPriceViewSet(viewsets.ModelViewSet):
+      queryset = CopyPrice.objects.all()
+      serializer_class = CopyPriceSerializer
+
+
+
+
+class CompanyDetailsViewSet(viewsets.ModelViewSet):
+    queryset = CompanyDetails.objects.all()
+    serializer_class = CompanyDetailsSerializer
+
+
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

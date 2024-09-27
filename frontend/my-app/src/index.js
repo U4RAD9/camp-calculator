@@ -1,18 +1,13 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client'; // Correct import
-import './index.css';
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { BrowserRouter } from 'react-router-dom';
 
-// Create a root and render the App component
-const root = createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+ReactDOM.render(
+  <Router>
+    <App />
+  </Router>,
+  document.getElementById('root')
 );
-
-reportWebVitals();
