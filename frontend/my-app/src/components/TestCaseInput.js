@@ -39,7 +39,7 @@ function TestCaseInput({ companyId, selectedServices, onNext }) {
   useEffect(() => {
     const fetchHardCopyPrices = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/copyprice/');
+        const response = await axios.get('http://15.206.159.215:8000/api/copyprice/');
         const prices = response.data.reduce((acc, service) => {
           acc[service.name] = parseFloat(service.hard_copy_price);
           return acc;
@@ -255,7 +255,7 @@ function TestCaseInput({ companyId, selectedServices, onNext }) {
     console.log("Sending payload to backend:", backendPayload);
   
     try {
-      await axios.post('http://127.0.0.1:8000/api/test-case-data/', backendPayload);
+      await axios.post('http://15.206.159.215:8000/api/test-case-data/', backendPayload);
       console.log("Data successfully sent to backend.");
     } catch (error) {
       console.error('Error saving test case data:', error);

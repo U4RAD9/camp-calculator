@@ -20,7 +20,7 @@ const CustomerDashboard = () => {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/company-details/');
+        const response = await axios.get('http://15.206.159.215:8000/api/company-details/');
         const companies = response.data;
 
         const normalizedUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -147,11 +147,6 @@ const CustomerDashboard = () => {
             ))
           )}
         </div>
-      </div>
-
-      {/* Reviews Slider Footer */}
-      <div className="bg-gray-200 p-6">
-        <ReviewsSlider />
       </div>
     </div>
   );

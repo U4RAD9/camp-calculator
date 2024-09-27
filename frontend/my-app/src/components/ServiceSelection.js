@@ -55,7 +55,7 @@ function ServiceSelection({ companyId, onNext,userType }) {
       ],
     };
 
-    axios.post('http://127.0.0.1:8000/api/serviceselection/', dataToSave)
+    axios.post('http://15.206.159.215:8000/api/serviceselection/', dataToSave)
     .then(response => {
       console.log(response.data.message);
       onNext(dataToSave.selected_services, companyId);

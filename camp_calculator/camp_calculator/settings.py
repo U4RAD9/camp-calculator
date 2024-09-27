@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-$%10+r&4*w(m5di()r!_d2wm=_dp5l+4l%crxg+f9to^(3nnv#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['http://15.206.159.215:8000', '15.206.159.215:8000', '15.206.159.215:3000']
 
 
 # Application definition
@@ -54,7 +54,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # React app URL
+    'http://localhost:3000',
+    'http://15.206.159.215:8000',
+    '15.206.159.215',
+    'http://15.206.159.215:3000'  # React app URL
 ]
 
 

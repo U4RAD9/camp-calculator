@@ -93,7 +93,7 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
   useEffect(() => {
     const fetchServiceCosts = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/service_costs/');
+        const response = await axios.get('http://15.206.159.215:8000/api/service_costs/');
         const costData = response.data.reduce((acc, cost) => {
           acc[cost.test_type_name] = {
             salary: parseFloat(cost.salary),
@@ -208,7 +208,7 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
   const handleSubmit = async () => {
     try {
       const finalDetails = calculateAllDetails();
-      await axios.post('http://127.0.0.1:8000/api/cost_details/', {
+      await axios.post('http://15.206.159.215:8000/api/cost_details/', {
         companyId,
         costDetails: Object.keys(finalDetails).reduce((acc, service) => {
           const { travel, stay, food, salary, misc, equipment, consumables, reporting,  } = finalDetails[service];

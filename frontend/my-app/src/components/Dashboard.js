@@ -4,7 +4,7 @@ import 'tailwindcss/tailwind.css';
 import { Link } from 'react-router-dom';
 
 const apiEndpoints = {
-  costsummaries: "http://127.0.0.1:8000/api/costsummaries/"
+  costsummaries: "http://15.206.159.215:8000/api/costsummaries/"
 };
 
 const Dashboard = () => {
@@ -66,6 +66,9 @@ const Dashboard = () => {
           </Link>
           <Link to='/login'> <h1 className="text-xl text-green-500 hover:text-green-700 transition-colors duration-200 cursor-pointer">
               Logout
+            </h1></Link>
+            <Link to='/newdashboard'> <h1 className="text-xl text-green-500 hover:text-green-700 transition-colors duration-200 cursor-pointer">
+              customer costing
             </h1></Link>
         </div>
 

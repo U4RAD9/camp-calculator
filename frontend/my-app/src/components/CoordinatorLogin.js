@@ -63,7 +63,7 @@ function CoordinatorLogin({ onLogin }) {
  
   const handleCustomerLogin = async (username, password) => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/', {
+      const response = await fetch('http://15.206.159.215:8000/api/users/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ function CoordinatorLogin({ onLogin }) {
     const { username, password, companyName } = signupData; // Destructure the data
   
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/', {
+      const response = await fetch('http://15.206.159.215:8000/api/users/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -202,13 +202,6 @@ function CoordinatorLogin({ onLogin }) {
               className="mt-6 rounded-md bg-blue-600 py-3 text-lg font-semibold text-white hover:bg-blue-700 transition duration-200"
             >
               {showSignup ? "Sign Up" : "Login"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowSignup((prev) => !prev)}
-              className="mt-2 text-blue-600 underline hover:text-blue-800 transition duration-200"
-            >
-              {showSignup ? "Already have an account? Login" : "Don't have an account? Sign Up"}
             </button>
           </div>
         </form>

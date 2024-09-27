@@ -23,8 +23,8 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
     const fetchServiceData = async () => {
       try {
         const [priceResponse, subserviceResponse] = await Promise.all([
-          axios.get('http://127.0.0.1:8000/api/prices/'),
-          axios.get('http://127.0.0.1:8000/api/service_costs/'),
+          axios.get('http://15.206.159.215:8000/api/prices/'),
+          axios.get('http://15.206.159.215:8000/api/service_costs/'),
         ]);
 
         const priceData = priceResponse.data.reduce((acc, service) => {
@@ -95,7 +95,7 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
 
   const handleCouponSubmit = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/api/validate-coupon/${couponCode}/`);
+      const response = await axios.get(`http://15.206.159.215:8000/api/api/validate-coupon/${couponCode}/`);
       setDiscount(response.data.discount_percentage);
       setError('');
     } catch (error) {
@@ -118,7 +118,7 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
     };
   
     try {
-      await axios.post('http://127.0.0.1:8000/api/company-details/', postData);
+      await axios.post('http://15.206.159.215:8000/api/company-details/', postData);
       onSubmit(costData);
       navigate('/CoordinatorLogin');
     } catch (error) {

@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Service, PriceRange,TestType,ServiceCost
 from .models import Company,Camp,ServiceSelection,TestData,CostDetails
 from .models import DiscountCoupon
-from .models import Estimation,CostSummary,CopyPrice,User,CompanyDetails
+from .models import Estimation,CostSummary,CopyPrice,User,CompanyDetails,ServiceDetails
 
 class PriceRangeInline(admin.TabularInline):
     model = PriceRange
@@ -90,3 +90,4 @@ class CopyPriceAdmin(admin.ModelAdmin):
 
 admin.site.register(User)
 admin.site.register(CompanyDetails)
+admin.site.register(ServiceDetails)

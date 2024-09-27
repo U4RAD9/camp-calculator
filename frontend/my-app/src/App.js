@@ -10,6 +10,7 @@ import SimpleCostCalculation from './components/SimpleCostCalculation';
 import Dashboard from './components/Dashboard';
 import CustomerDashboard from './components/CustomerDashboard';
 import ProtectedRoute from './components/ProtectedRoute'; // Import your ProtectedRoute component
+import NewDashboard from './components/NewDashboard';
 
 function App() {
   const [loginType, setLoginType] = useState(null);
@@ -93,6 +94,7 @@ function App() {
         <Route path="/simple-cost-calculation" element={<SimpleCostCalculation caseData={caseData} campDetails={campDetails} onSubmit={handleFinalSubmit} />} />
         <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} isAuthenticated={isAuthenticated} />} />
         <Route path="/customer-dashboard" element={<ProtectedRoute element={<CustomerDashboard />} isAuthenticated={isAuthenticated} />} /> {/* Added route for Customer Dashboard */}
+        <Route path="/newdashboard" element={<NewDashboard/>} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </div>

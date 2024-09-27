@@ -295,7 +295,7 @@ if (locations.length > 0) {
         };
 
         try {
-            await axios.post('http://127.0.0.1:8000/api/costsummaries/', data, {
+            await axios.post('http://15.206.159.215:8000/api/costsummaries/', data, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
