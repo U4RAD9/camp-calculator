@@ -20,7 +20,7 @@ const CampDetails = ({ onNext }) => {
   const [endDate, setEndDate] = useState(null);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   const handleAddCamp = () => {
     if (campLocation && campDistrict && campState && campPinCode && campLandmark && startDate && endDate && endDate >= startDate) {
       const newCamp = {
@@ -111,28 +111,30 @@ const CampDetails = ({ onNext }) => {
       <div className="grid grid-cols-2 gap-4">
         <input
           type="text"
-          placeholder="District"
+          placeholder="Flat, House no., Building, Company, Apartment"
           className="border rounded-lg p-3 mb-4 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={companyDistrict}
           onChange={(e) => setCompanyDistrict(e.target.value)}
         />
         <input
           type="text"
-          placeholder="State"
+          placeholder="Area, Street, Sector, Village"
           className="border rounded-lg p-3 mb-4 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={companyState}
           onChange={(e) => setCompanyState(e.target.value)}
         />
         <input
-          type="text"
+          type="number"
           placeholder="Pin Code"
           className="border rounded-lg p-3 mb-4 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={companyPinCode}
           onChange={(e) => setCompanyPinCode(e.target.value)}
+          inputMode="numeric"
+          pattern="[0-9]*"
         />
         <input
           type="text"
-          placeholder="Landmark"
+          placeholder="state"
           className="border rounded-lg p-3 mb-4 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={companyLandmark}
           onChange={(e) => setCompanyLandmark(e.target.value)}
@@ -176,28 +178,31 @@ const CampDetails = ({ onNext }) => {
           value={campLandmark}
           onChange={(e) => setCampLandmark(e.target.value)}
         />
-        <div className="mb-4 flex space-x-2">
-          <div className="flex-1 relative">
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              dateFormat="yyyy-MM-dd"
-              placeholderText="Start Date"
-              className="border rounded-lg p-3 mb-2 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <FaCalendarAlt className="absolute top-1/2 transform -translate-y-1/2 right-3 text-gray-500" />
-          </div>
-          <div className="flex-1 relative">
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              dateFormat="yyyy-MM-dd"
-              placeholderText="End Date"
-              className="border rounded-lg p-3 mb-2 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <FaCalendarAlt className="absolute top-1/2 transform -translate-y-1/2 right-3 text-gray-500" />
-          </div>
-        </div>
+       <div className="mb-4 flex space-x-2">
+  <div className="flex-1 relative">
+    <DatePicker
+      selected={startDate}
+      onChange={(date) => setStartDate(date)}
+      dateFormat="yyyy-MM-dd"
+      placeholderText="Start Date"
+      className="border rounded-lg p-3 mb-2 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+      minDate={new Date()} // Disable previous dates
+    />
+    <FaCalendarAlt className="absolute top-1/2 transform -translate-y-1/2 right-3 text-gray-500" />
+  </div>
+  <div className="flex-1 relative">
+    <DatePicker
+      selected={endDate}
+      onChange={(date) => setEndDate(date)}
+      dateFormat="yyyy-MM-dd"
+      placeholderText="End Date"
+      className="border rounded-lg p-3 mb-2 w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+      minDate={startDate || new Date()} // Ensure end date is after start date
+    />
+    <FaCalendarAlt className="absolute top-1/2 transform -translate-y-1/2 right-3 text-gray-500" />
+  </div>
+</div>
+
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-200"
           onClick={handleAddCamp}

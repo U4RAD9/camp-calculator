@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-
+import { fetchHardCopyPrices,saveTestCaseData } from './api';
 function TestCaseInput({ companyId, selectedServices, onNext }) {
   const [caseData, setCaseData] = useState({});
   const [errors, setErrors] = useState({});
   const [hardCopyPrices, setHardCopyPrices] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const thresholds = {
     'X-ray': 200,
@@ -18,7 +19,9 @@ function TestCaseInput({ companyId, selectedServices, onNext }) {
     'Doctor Consultation':100,
     'Dental Consultation':125,
      'Vitals':150,
-     'BMD':150
+     'BMD':150,
+     'Tetanus Vaccine':125,
+     'Typhoid Vaccine':125
 
   };
 
@@ -37,19 +40,18 @@ function TestCaseInput({ companyId, selectedServices, onNext }) {
   ].filter(service => selectedServices.includes(service));
 
   useEffect(() => {
-    const fetchHardCopyPrices = async () => {
+    const fetchPrices = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get('http://15.206.159.215:8000/api/copyprice/');
-        const prices = response.data.reduce((acc, service) => {
-          acc[service.name] = parseFloat(service.hard_copy_price);
-          return acc;
-        }, {});
+        const prices = await fetchHardCopyPrices();
         setHardCopyPrices(prices);
       } catch (error) {
-        console.error('Error fetching hard copy prices:', error);
+        // Handle error if needed
+      } finally {
+        setLoading(false);
       }
     };
-    fetchHardCopyPrices();
+    fetchPrices();
   }, []);
 
   useEffect(() => {
@@ -248,17 +250,14 @@ function TestCaseInput({ companyId, selectedServices, onNext }) {
         case_per_day: data.casePerDay,
         number_of_days: data.numberOfDays,
         total_case: data.totalCase,
-        report_type_cost: data.reportTypeCost || 0  // Ensure reportTypeCost is passed
+        report_type_cost: data.reportTypeCost || 0
       };
     });
-  
-    console.log("Sending payload to backend:", backendPayload);
-  
+
     try {
-      await axios.post('http://15.206.159.215:8000/api/test-case-data/', backendPayload);
-      console.log("Data successfully sent to backend.");
+      await saveTestCaseData(backendPayload);
     } catch (error) {
-      console.error('Error saving test case data:', error);
+      // Handle error if needed
     }
   };
   

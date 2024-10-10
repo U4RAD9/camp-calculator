@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import axios from 'axios';
+import { submitCostSummary } from './api';
 function CostSummaryScreen({ caseData, costDetails, campDetails, companyId,onSubmit,}) {
     const [markup, setMarkup] = useState({});
     // Helper functions to handle billing counter
@@ -118,48 +119,30 @@ doc.setTextColor(0, 0, 0);
 let positionY = 60; // Starting point for company details
 
 const { companyName, companyState, companyDistrict, companyPinCode, companyLandmark, companyAddress } = campDetails;
-
+// Assuming positionY is already defined and used for vertical spacing
 if (companyName) {
     doc.setFont("helvetica", "bold");
-    doc.text('Company Name:', 14, positionY);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${companyName}`, 50, positionY);
+    doc.text(companyName, 14, positionY); // Display the company name
     positionY += 7;
 }
 
-if (companyState || companyDistrict || companyPinCode) {
-    doc.setFont("helvetica", "bold");
-    doc.text('State:', 14, positionY);
+if (companyAddress || companyLandmark || companyDistrict || companyState || companyPinCode) {
+    // Combine all address components into a single continuous line
+    const addressParts = [
+        companyAddress || '',
+        companyLandmark || '',
+        companyDistrict || '',
+        companyState || '',
+        companyPinCode || ''
+    ];
+    
+    // Filter out empty strings and join them with a space
+    const formattedAddressLine = addressParts.filter(part => part.trim() !== '').join(' ');
+
+    // Print the combined address in a single line
     doc.setFont("helvetica", "normal");
-    doc.text(`${companyState || 'N/A'}`, 50, positionY); // State value
+    doc.text(formattedAddressLine, 14, positionY); // Display the complete address
 
-    doc.setFont("helvetica", "bold");
-    doc.text('District:', 100, positionY);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${companyDistrict || 'N/A'}`, 130, positionY); // District value
-
-    positionY += 7;
-
-    doc.setFont("helvetica", "bold");
-    doc.text('Pin Code:', 14, positionY);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${companyPinCode || 'N/A'}`, 50, positionY); // Pin code value
-    positionY += 7;
-}
-
-if (companyAddress || companyLandmark) {
-    doc.setFont("helvetica", "bold");
-    doc.text('Address:', 14, positionY);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${companyAddress || 'N/A'}`, 50, positionY);
-
-    positionY += 7;
-    if (companyLandmark) {
-        doc.setFont("helvetica", "bold");
-        doc.text('Landmark:', 14, positionY);
-        doc.setFont("helvetica", "normal");
-        doc.text(`${companyLandmark}`, 50, positionY);
-    }
     positionY += 7;
 }
 
@@ -264,7 +247,6 @@ if (locations.length > 0) {
         doc.save(`U4RAD CAMP Estimation_${billingNumber}.pdf`);
     };
 
-    // Handle form submission
     const handleSubmit = async () => {
         const billingNumber = generateBillingNumber();
         const data = {
@@ -293,19 +275,13 @@ if (locations.length > 0) {
             }),
             grand_total: grandTotal,
         };
-
+    
         try {
-            await axios.post('http://15.206.159.215:8000/api/costsummaries/', data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            await submitCostSummary(data); // Call the function to submit data
             alert('Data submitted successfully!');
         } catch (error) {
-            console.error('Error submitting data:', error);
             alert('Failed to submit data.');
         }
-
     };
     
     return (

@@ -77,7 +77,7 @@ class CompanyDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CompanyDetails
-        fields = ['company_name', 'grand_total', 'services']
+        fields = ['company_name', 'grand_total', 'services','super_company']
 
     def create(self, validated_data):
         services_data = validated_data.pop('services')

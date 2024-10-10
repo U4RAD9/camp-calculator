@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { useNavigate } from "react-router-dom"; // Use this for navigation
+import { useNavigate } from "react-router-dom";
+import { loginAsCoordinator,loginAsCustomer,signupUser } from "./api";
 
 function CoordinatorLogin({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -21,10 +22,6 @@ function CoordinatorLogin({ onLogin }) {
   const navigate = useNavigate(); // Navigation hook
 
   // Fixed coordinator credentials
-  const coordinatorCredentials = {
-    username: "campcalculator@123",
-    password: "camp15042002",
-  };
 
   const handleOnChange = (e) => {
     setFormData((prevData) => ({
@@ -41,89 +38,46 @@ function CoordinatorLogin({ onLogin }) {
     }));
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = formData;
 
-    if (
-      username === coordinatorCredentials.username &&
-      password === coordinatorCredentials.password
-    ) {
-      // Save user role and username in localStorage
-      localStorage.setItem("role", "Coordinator");
-      localStorage.setItem("username", username);
-      onLogin("Coordinator");
-      navigate("/dashboard"); // Redirect to coordinator's dashboard
-    } else {
-      // Handle customer login
-      handleCustomerLogin(username, password);
+    try {
+      const { role, username: user } = await loginAsCoordinator(username, password);
+      localStorage.setItem("role", role);
+      localStorage.setItem("username", user);
+      onLogin(role);
+      navigate("/dashboard");
+    } catch (error) {
+      await handleCustomerLogin(username, password);
     }
   };
 
  
+  
   const handleCustomerLogin = async (username, password) => {
     try {
-      const response = await fetch('http://15.206.159.215:8000/api/users/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Unable to fetch users.");
-      }
-  
-      const users = await response.json();
-      const matchedUser = users.find(
-        (user) => user.username === username && user.password === password
-      );
-  
-      if (matchedUser) {
-        // Store user data in localStorage
-        localStorage.setItem("role", "Customer");
-        localStorage.setItem("username", matchedUser.username);
-        localStorage.setItem("companyName", matchedUser.company_name); // Store the company name
-  
-        onLogin("Customer");
-  
-        // Navigate to the coordinator dashboard with the company name
-        navigate("/customer-dashboard", {
-          state: { companyName: matchedUser.company_name }, // Pass companyName as state
-        });
-      } else {
-        setErrorMessage("Invalid customer credentials.");
-      }
+      const { role, username: user, companyName } = await loginAsCustomer(username, password);
+      localStorage.setItem("role", role);
+      localStorage.setItem("username", user);
+      localStorage.setItem("companyName", companyName);
+      onLogin(role);
+      navigate("/customer-dashboard", { state: { companyName } });
     } catch (error) {
-      setErrorMessage("Error fetching customer details: " + error.message);
+      setErrorMessage(error.message);
     }
   };
-  
+
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
-    const { username, password, companyName } = signupData; // Destructure the data
-  
+    const { username, password, companyName } = signupData;
+
     try {
-      const response = await fetch('http://15.206.159.215:8000/api/users/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-          company_name: companyName, // Use the correct key
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Signup failed');
-      }
-  
-      alert("Signup successful! You can now log in.");
+      const successMessage = await signupUser(username, password, companyName);
+      alert(successMessage);
       setShowSignup(false);
     } catch (error) {
-      setErrorMessage("Error during signup: " + error.message);
+      setErrorMessage(error.message);
     }
   };
 

@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { jsPDF } from "jspdf";
 
-
-function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
+function SimpleCostCalculation({ caseData, onSubmit,campDetails,username}) {
   const [priceRanges, setPriceRanges] = useState({});
   const [subserviceCosts, setSubserviceCosts] = useState({});
   const [initialized, setInitialized] = useState(false);
+  const [partnerMargin, setPartnerMargin] = useState(0); // New state for partner margin
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   console.log(campDetails)
-
+  console.log(username)
   useEffect(() => {
     console.log('caseData:', caseData);
   }, [caseData]);
@@ -85,13 +84,15 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
       const totalCase = caseData[service]?.totalCase || 0;
       return total + calculateTotalPrice(service, totalCase);
     }, 0);
-    return total * ((100 - discount) / 100);
+    return total * ((100 + partnerMargin) / 100) * ((100 - discount) / 100);
   };
   const calculateTotalCases = () => {
-    return Object.keys(caseData).reduce((totalCases, service) => {
-      return totalCases + (caseData[service]?.totalCase || 0);
-    }, 0);
+    return Object.keys(caseData).reduce((maxCases, service) => {
+      const totalCase = caseData[service]?.totalCase || 1;
+      return Math.max(maxCases, totalCase); // Find the maximum case value
+    }, 0); // Start with 0 as the initial maximum
   };
+  
 
   const handleCouponSubmit = async () => {
     try {
@@ -114,6 +115,7 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
     const postData = {
       company_name: campDetails.companyName,
       grand_total: grandTotal.toFixed(2),
+      super_company:username,
       services: costData,
     };
   
@@ -130,112 +132,67 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
   const totalCases = calculateTotalCases();
   const perCasePrice = totalCases > 0 ? grandTotal / totalCases : 0;
   const generatePDF = () => {
-    // Switch to landscape 'a3' for more horizontal space
-    const doc = new jsPDF('l', 'mm', 'a3'); // Landscape, A3 size
+    const doc = new jsPDF('l', 'mm', 'a3');
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 15; // Margin remains the same
+    const margin = 15;
     const rowHeight = 12;
     const headerHeight = 10;
-    const sectionSpacing = 10;
-
-    // Adjusted column widths to fit more content on the wider page
+    const sectionSpacing = 14;
+    
+    // Column widths
     const columnWidths = [40, 60, 60, 40, 35, 45, 45];
 
-    // Set PDF title
-    doc.setFontSize(22);
+    // Set title
+    doc.setFontSize(30);
     doc.setTextColor(0, 102, 204);
-    doc.text("U4RAD CAMP CALCULATOR", margin, margin);
+    doc.text("Xrai", margin, margin);
 
     // Company Details Section
-    doc.setFontSize(18);
+    doc.setFontSize(22);
     doc.setTextColor(0, 0, 0);
     doc.text("Company Details", margin, margin + 25);
-    doc.setFontSize(12);
-
-    // Company Details Grid
+    doc.setFontSize(18);
     const companyDetails = [
         { label: "Company Name", value: campDetails.companyName },
-        { label: "Company Landmark", value: campDetails.companyLandmark },
-        { label: "Company District", value: campDetails.companyDistrict },
-        { label: "Company State", value: campDetails.companyState },
-        { label: "Company Pin Code", value: campDetails.companyPinCode },
+        { label: "Company Address", value: `${campDetails.companyLandmark}, ${campDetails.companyDistrict}, ${campDetails.companyState} - ${campDetails.companyPinCode}` },
     ];
 
-    let currentY = margin + 35;
+    let currentY = margin + 37;
     doc.setFont("Helvetica", "bold");
     companyDetails.forEach(detail => {
         doc.text(`${detail.label}: ${detail.value}`, margin, currentY);
-        currentY += rowHeight + 2;
+        currentY += rowHeight + 4; // Increased spacing for readability
     });
 
     // Camps Section
-    doc.setFontSize(18);
+    doc.setFontSize(22);
     currentY += sectionSpacing;
     doc.text("Camps", margin, currentY);
     const camps = campDetails.camps;
 
-    // Draw Camps Table Header
-    const campHeaders = ["District", "Location", "Landmark", "State", "Pin Code", "Start Date", "End Date"];
-    const campHeaderY = currentY + 10;
-
-    // Draw Camps Header with Borders and Background Color
-    doc.setFillColor(0, 153, 255);
-    doc.rect(margin, campHeaderY - headerHeight, pageWidth - 2 * margin, headerHeight, 'F');
-    doc.setFont("Helvetica", "bold");
-
-    campHeaders.forEach((header, index) => {
-        const xPos = margin + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
-        doc.text(header, xPos + 2, campHeaderY);
-    });
-
-    // Draw Camps Rows with alternating colors and increased spacing
-    let campStartY = campHeaderY + 8;
-    camps.forEach((camp, index) => {
-        if (campStartY + rowHeight > doc.internal.pageSize.height - margin) {
-            doc.addPage();
-            campStartY = margin;
-        }
-        doc.setFillColor(index % 2 === 0 ? 240 : 255);
-        doc.rect(margin, campStartY, pageWidth - 2 * margin, rowHeight, 'F');
-        doc.setFont("Helvetica", "normal");
-
-        let xOffset = margin;
-        doc.text(camp.campDistrict, xOffset, campStartY + 6);
-        xOffset += columnWidths[0];
-        doc.text(camp.campLocation, xOffset, campStartY + 6);
-        xOffset += columnWidths[1];
-        doc.text(camp.campLandmark, xOffset, campStartY + 6);
-        xOffset += columnWidths[2];
-        doc.text(camp.campState, xOffset, campStartY + 6);
-        xOffset += columnWidths[3];
-        doc.text(camp.campPinCode, xOffset, campStartY + 6);
-        xOffset += columnWidths[4];
-
-        // Format and fit the Start Date and End Date with proper spacing
-        const startDateFormatted = new Date(camp.startDate).toLocaleDateString();
-        const endDateFormatted = new Date(camp.endDate).toLocaleDateString();
-        doc.text(startDateFormatted, xOffset, campStartY + 6);
-        xOffset += columnWidths[5];
-        doc.text(endDateFormatted, xOffset, campStartY + 6);
-
-        campStartY += rowHeight + 4;
+    // Draw Camps Details in Single Line
+    camps.forEach(camp => {
+        const campDetailsLine = `Camp: ${camp.campDistrict}, ${camp.campLocation}, ${camp.campLandmark}, ${camp.campState}, ${camp.campPinCode}, Start Date: ${new Date(camp.startDate).toLocaleDateString()}, End Date: ${new Date(camp.endDate).toLocaleDateString()}`;
+        currentY += rowHeight + 11;
+        doc.text(campDetailsLine, margin, currentY);
     });
 
     // Service Costs Section
-    doc.setFontSize(18);
-    currentY = campStartY + sectionSpacing;
+    doc.setFontSize(22);
+    currentY += sectionSpacing;
     doc.text("Service Costs", margin, currentY);
 
     // Draw Service Costs Table Header
     const serviceHeaders = ["Service", "Total Cases"];
-    const serviceHeaderY = currentY + 10;
+    const serviceHeaderY = currentY + 17;
 
-    // Draw Service Header with Borders and Background Color
+    // Header background color
     doc.setFillColor(0, 153, 255);
     doc.rect(margin, serviceHeaderY - headerHeight, pageWidth - 2 * margin, headerHeight, 'F');
     doc.setFont("Helvetica", "bold");
     serviceHeaders.forEach((header, index) => {
-        const xPos = margin + index * 100; // Increased spacing to fit wider page
+        const xPos = margin + index * 100; 
+        doc.setTextColor(255, 255, 255); // White text color for headers
         doc.text(header, xPos + 2, serviceHeaderY);
     });
 
@@ -247,11 +204,12 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
             serviceStartY = margin;
         }
         const totalCase = caseData[service]?.totalCase || 0;
-        doc.setFillColor(index % 2 === 0 ? 240 : 255);
+        doc.setFillColor(index % 2 === 0 ? 240 : 255); // Alternating row colors
         doc.rect(margin, serviceStartY, pageWidth - 2 * margin, rowHeight, 'F');
         doc.setFont("Helvetica", "normal");
-        doc.text(service, margin + 0, serviceStartY + 6);
-        doc.text(totalCase.toString(), margin + 100, serviceStartY + 6); // Adjusted positioning
+        doc.setTextColor(0, 0, 0); // Reset text color for content
+        doc.text(service, margin + 2, serviceStartY + 8);
+        doc.text(totalCase.toString(), margin + 100, serviceStartY + 8); 
         serviceStartY += rowHeight + 4;
     });
 
@@ -261,7 +219,7 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
     const perCasePrice = totalCases > 0 ? grandTotal / totalCases : 0;
 
     // Grand Total Section
-    doc.setFontSize(16);
+    doc.setFontSize(22);
     doc.setFont("Helvetica", "bold");
     currentY = serviceStartY + sectionSpacing;
     doc.setTextColor(0, 102, 204);
@@ -269,13 +227,14 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
     doc.text(`Per-Case Price: ${perCasePrice.toFixed(0)}`, margin, currentY + 10);
 
     // Save PDF
-    doc.save("camp_calculator.pdf");
+    doc.save("xraidigitalcampcalculator.pdf");
 };
+
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
      <h2 className="text-4xl font-extrabold mb-6 text-blue-600 text-center shadow-lg p-4 rounded-md bg-gray-50 border border-gray-200">
-  U4RAD 
+  XRAI
 </h2>
 
       <div className="space-y-4">
@@ -320,6 +279,16 @@ function SimpleCostCalculation({ caseData, onSubmit,campDetails}) {
           </div>
           {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>
+        <div>
+        <label htmlFor="partnerMargin" className="block text-gray-700">Partner Margin (%):</label>
+        <input
+          type="number"
+          id="partnerMargin"
+          value={partnerMargin}
+          onChange={(e) => setPartnerMargin(parseFloat(e.target.value) || 0)}
+          className="border border-gray-300 rounded-md p-2 mb-4"
+        />
+      </div>
 
         <div className="mt-4 flex justify-between items-center border-t pt-4">
           <div className="text-lg font-bold text-gray-800">

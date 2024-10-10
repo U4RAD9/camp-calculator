@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { creatservices } from './api';
 
 function ServiceSelection({ companyId, onNext,userType }) {
   const [selectedServices, setSelectedServices] = useState([]);
@@ -12,7 +13,7 @@ function ServiceSelection({ companyId, onNext,userType }) {
   const services = [
     'X-ray', 'ECG', 'PFT', 'Audiometry', 'Optometry', 
     'Doctor Consultation', 'Pathology', 'Dental Consultation', 
-    'Vitals', 'Form 7', 'BMD'
+    'Vitals', 'Form 7', 'BMD','Tetanus Vaccine','Typhoid Vaccine','Coordinator'
   ];
 
   const pathologySubServices = [
@@ -55,15 +56,15 @@ function ServiceSelection({ companyId, onNext,userType }) {
       ],
     };
 
-    axios.post('http://15.206.159.215:8000/api/serviceselection/', dataToSave)
+    creatservices(dataToSave)
     .then(response => {
-      console.log(response.data.message);
+      console.log(response.message);
       onNext(dataToSave.selected_services, companyId);
     })
     .catch(error => {
       console.error('There was an error saving the service selections!', error);
     });
-  };
+};
 
   return (
     <div className="bg-gradient-to-r from-blue-200 to-blue-400 min-h-screen flex items-center justify-center">

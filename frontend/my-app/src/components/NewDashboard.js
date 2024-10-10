@@ -31,12 +31,13 @@ const NewDashboard = () => {
         companyData.map((company, index) => (
           <div key={index} className="bg-white shadow-md rounded-lg p-6 mb-6">
             <h2 className="text-2xl font-semibold flex justify-between items-center">
-              {company.company_name}
+              {company.company_name}<h2>costing done by {company.super_company}</h2>
               <button 
                 className="text-blue-500 font-medium"
                 onClick={() => handleToggle(index)}
               >
                 {expandedCompanyIndex === index ? 'Hide Details' : 'Show Details'}
+
               </button>
             </h2>
             <p className="text-lg">Grand Total: ₹{company.grand_total}</p>

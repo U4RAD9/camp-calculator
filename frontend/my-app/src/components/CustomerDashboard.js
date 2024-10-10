@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2'; 
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import ReviewsSlider from './ReviewsSlider'; // Import your ReviewsSlider
 
 // Register the required components for Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -25,7 +24,7 @@ const CustomerDashboard = () => {
 
         const normalizedUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
         const userCompanies = companies.filter(company => {
-          const normalizedCompanyName = company.company_name.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const normalizedCompanyName = company.super_company.toLowerCase().replace(/[^a-z0-9]/g, '');
           return normalizedCompanyName.includes(normalizedUsername);
         });
 
@@ -52,7 +51,7 @@ const CustomerDashboard = () => {
   };
 
   const chartData = {
-    labels: companyDetails.map((_, index) => `${index + 1}`),
+    labels: companyDetails.map(company => company.company_name),  // Use company name here
     datasets: [
       {
         label: 'Grand Total (₹)',
@@ -84,7 +83,8 @@ const CustomerDashboard = () => {
         <div className="w-64 bg-gray-800 text-white h-screen p-6">
           <h2 className="text-2xl font-bold">{username}</h2>
           <nav className="mt-8">
-            <Link to="/camp-details" className="block py-2 px-4 hover:bg-gray-700 rounded">Add New Camp</Link>
+          <Link to="/camp-details" className="block py-2 px-4 hover:bg-gray-700 rounded">Add New Camp</Link>
+
             <Link to="/login" className="block py-2 px-4 hover:bg-gray-700 rounded">LOGOUT</Link>
           </nav>
         </div>
@@ -119,7 +119,7 @@ const CustomerDashboard = () => {
               <div key={index} className="mb-6 border bg-white p-4 rounded-lg shadow-md">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-xl font-semibold">{`${index + 1}`}</h3>
+                    <h3 className="text-xl font-semibold">{company.company_name}</h3>
                     <p>Grand Total: ₹{company.grand_total}</p>
                     <p>Date: {company.datenow}</p>
                   </div>

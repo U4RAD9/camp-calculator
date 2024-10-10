@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { getServiceCosts,submitCostDetails } from './api';
 
 const defaultCostValues = {
   travel: 0,
@@ -9,6 +9,12 @@ const defaultCostValues = {
 
 const serviceCalculationRules = {
   'X-ray': {
+    getSalary: (salary, days) => salary * days,
+    getConsumables: (consumables, totalCase) => consumables * totalCase,
+    getReporting: (reporting, totalCase) => reporting * totalCase,
+    getIncentive: (incentive, days) => incentive * days,
+  },
+  'Coordinator': {
     getSalary: (salary, days) => salary * days,
     getConsumables: (consumables, totalCase) => consumables * totalCase,
     getReporting: (reporting, totalCase) => reporting * totalCase,
@@ -24,18 +30,6 @@ const serviceCalculationRules = {
     getSalary: (salary, totalCase) => salary * totalCase,
     getConsumables: (consumables, totalCase) => consumables * totalCase,
     getReporting: (reporting, totalCase) => reporting * totalCase,
-    getIncentive: (incentive, days) => incentive * days,
-  },
-  'CBC': {
-    getSalary: (salary, days) => salary * days,
-    getConsumables: (consumables, totalCase) => consumables * totalCase,
-    getReporting: (reporting) => reporting ,
-    getIncentive: (incentive, days) => incentive * days,
-  },
-  'Complete Hemogram': {
-    getSalary: (salary, days) => salary * days,
-    getConsumables: (consumables, totalCase) => consumables * totalCase,
-    getReporting: (reporting) => reporting,
     getIncentive: (incentive, days) => incentive * days,
   },
  
@@ -81,6 +75,18 @@ const serviceCalculationRules = {
     getReporting: (reporting, totalCase) => reporting * totalCase,
     getIncentive: (incentive, days) => incentive * days,
   },
+  'Tetanus Vaccine': {
+    getSalary: (salary, days) => salary * days,
+    getConsumables: (consumables, totalCase) => consumables * totalCase,
+    getReporting: (reporting, totalCase) => reporting * totalCase,
+    getIncentive: (incentive, days) => incentive * days,
+  },
+  'Typhoid Vaccine': {
+    getSalary: (salary, days) => salary * days,
+    getConsumables: (consumables, totalCase) => consumables * totalCase,
+    getReporting: (reporting, totalCase) => reporting * totalCase,
+    getIncentive: (incentive, days) => incentive * days,
+  },
 
   
 };
@@ -93,8 +99,8 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
   useEffect(() => {
     const fetchServiceCosts = async () => {
       try {
-        const response = await axios.get('http://15.206.159.215:8000/api/service_costs/');
-        const costData = response.data.reduce((acc, cost) => {
+        const costData = await getServiceCosts();
+        const formattedCostData = costData.reduce((acc, cost) => {
           acc[cost.test_type_name] = {
             salary: parseFloat(cost.salary),
             incentive: parseFloat(cost.incentive),
@@ -105,17 +111,18 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
           };
           return acc;
         }, {});
-        setCostDetails(costData);
+        setCostDetails(formattedCostData);
         setInitialized(true);
       } catch (error) {
         console.error('Error fetching service costs:', error);
       }
     };
-
+  
     if (!initialized) {
       fetchServiceCosts();
     }
   }, [initialized]);
+  
 
   // Initialize the cost details with case data
   useEffect(() => {
@@ -145,15 +152,30 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
       },
     }));
   };
+  const defaultPrices = {
+    'CBC': 20,
+    'Complete Hemogram': 40,
+    'Hemoglobin': 60,
+    'Urine Routine': 90,
+    'Stool Examination': 100,
+    'Lipid Profile': 30,
+    'Kidney Profile': 50,
+    'LFT': 70,
+    'KFT': 80,
+    'Random Blood Glucose': 45,
+    'Blood Grouping': 65
+  };
 
   const calculateAllDetails = useCallback(() => {
     const details = {};
+ 
     Object.keys(caseData).forEach(testType => {
       const { totalCase = 0, numberOfDays = 0, reportTypeCost = 0 } = caseData[testType] || {};
       const rules = serviceCalculationRules[testType] || serviceCalculationRules['default'];
-
-      if (['CBC', 'Complete Hemogram','Hemoglobin','Urine Routine','Stool Examination','Lipid Profile','Kidney Profile','LFT','KFT','Random Blood Glucose','Blood Grouping'].includes(testType)) {
-        const tPrice = costDetails[testType]?.reporting +costDetails[testType]?.reportTypeCost|| 0; // Editable total price for CBC and Complete Hemogram
+  
+      if (Object.keys(defaultPrices).includes(testType)) {
+        const defaultPrice = defaultPrices[testType];
+        const tPrice = costDetails[testType]?.tPrice || defaultPrice; // Ensure tPrice is valid
         details[testType] = {
           salary: 0,
           incentive: 0,
@@ -167,7 +189,7 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
           reportTypeCost,
           overhead: 0,
           tPrice,
-          unitPrice:  tPrice ,
+          unitPrice: tPrice
         };
       } else {
         const salary = rules.getSalary(costDetails[testType]?.salary || 0, testType === 'Form 7' ? totalCase : numberOfDays);
@@ -183,6 +205,7 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
         const overhead = (salary + incentive + misc + equipment + reportTypeCost + consumables + reporting + travel + stay + food) * 1.5;
         const tPrice = overhead * 1.3;
 
+      
         details[testType] = {
           salary,
           incentive,
@@ -196,8 +219,16 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
           reportTypeCost,
           overhead,
           tPrice,
-          unitPrice: totalCase ? tPrice / totalCase : 0,
+          unitPrice:
+            testType === "vitals" || testType === "optometry" || testType === "audiometry"
+              ? totalCase < 100
+                ? tPrice / totalCase // If totalCase < 100, use total cases
+                : tPrice / 100       // If totalCase >= 100, divide by 100
+              : totalCase
+              ? tPrice / totalCase   // For other test types, calculate normally
+              : 0,                   // If totalCase is 0, return 0
         };
+        
       }
     });
     return details;
@@ -208,29 +239,17 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
   const handleSubmit = async () => {
     try {
       const finalDetails = calculateAllDetails();
-      await axios.post('http://15.206.159.215:8000/api/cost_details/', {
-        companyId,
-        costDetails: Object.keys(finalDetails).reduce((acc, service) => {
-          const { travel, stay, food, salary, misc, equipment, consumables, reporting,  } = finalDetails[service];
-          acc[service] = {
-            travel,
-            stay,
-            food,
-            salary,
-            misc,
-            equipment,
-            consumables,
-            reporting,
-            
-          };
-          return acc;
-        }, {})
-      });
-      onSubmit(finalDetails); // Pass the final calculated details to onSubmit
+      await submitCostDetails(companyId, Object.keys(finalDetails).reduce((acc, service) => {
+        const { travel, stay, food, salary, misc, equipment, consumables, reporting } = finalDetails[service];
+        acc[service] = { travel, stay, food, salary, misc, equipment, consumables, reporting };
+        return acc;
+      }, {}));
+      onSubmit(finalDetails);
     } catch (error) {
       console.error('Error submitting cost details:', error);
     }
   };
+  
   
   return (
     <div className="p-4">
@@ -277,19 +296,18 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
                       className="p-2 border"
                     />
                   </td>
-                  <td className="px-6 py-4">
-                  {service === 'CBC' || service === 'Complete Hemogram' || service === 'Hemoglobin' || service === 'Urine Routine' || service === 'Stool Examination' || service === 'Lipid Profile' || service === 'Kidney Profile' || service === 'LFT' || service === 'KFT' || service === 'Random Blood Glucose' || service === 'Blood Grouping' ? (
-  <input
-    type="number"
-    value={costDetails[service]?.tPrice }
-    onChange={e => handleChange(service, 'tPrice', +e.target.value)}
-    className="p-2 border"
-  />
-) : (
-  details.tPrice.toFixed(2)
-)}
-                  </td>
-                </tr>
+               <td className="px-6 py-4">
+  {['CBC', 'Complete Hemogram', 'Hemoglobin', 'Urine Routine', 'Stool Examination', 'Lipid Profile', 'Kidney Profile', 'LFT', 'KFT', 'Random Blood Glucose', 'Blood Grouping'].includes(service) ? (
+    <input
+      type="number"
+      value={costDetails[service]?.tPrice || defaultPrices[service]} // Use costDetails or fallback to defaultPrices
+      onChange={e => handleChange(service, 'tPrice', +e.target.value)}
+      className="p-2 border"
+    />
+  ) : (
+    details?.tPrice?.toFixed(2) // Ensure details exist before accessing tPrice
+  )}
+</td>    </tr>
               );
             })}
           </tbody>
@@ -308,5 +326,6 @@ function CostCalculation({ caseData, onSubmit,companyId }) {
 }
 
 export default CostCalculation;
+
 
 

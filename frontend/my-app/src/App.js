@@ -19,9 +19,10 @@ function App() {
   const [selectedServices, setSelectedServices] = useState([]);
   const [caseData, setCaseData] = useState({});
   const [costDetails, setCostDetails] = useState({});
+  const [supercompany, setsupercompany] = useState({});
 
   const navigate = useNavigate();
-  
+
   const isAuthenticated = !!loginType; // Check if the user is authenticated
 
   const handleLogin = (type) => {
@@ -77,6 +78,9 @@ function App() {
     handleFinalSubmit();
   };
 
+  // Retrieve username from local storage
+  const username = localStorage.getItem('companyName');
+
   return (
     <div className="container mx-auto p-4">
       {window.location.pathname === '/cost-summary' && (
@@ -91,10 +95,10 @@ function App() {
         <Route path="/test-case-input" element={<TestCaseInput selectedServices={selectedServices} companyId={companyId} onNext={handleTestCaseInputNext} />} />
         <Route path="/cost-calculation" element={<CostCalculation caseData={caseData} companyId={companyId} onSubmit={handleCostCalculationNext} />} />
         <Route path="/cost-summary" element={<CostSummaryScreen caseData={caseData} costDetails={costDetails} companyId={companyId} campDetails={campDetails} onSubmit={handleFinalSubmit} />} />
-        <Route path="/simple-cost-calculation" element={<SimpleCostCalculation caseData={caseData} campDetails={campDetails} onSubmit={handleFinalSubmit} />} />
+        <Route path="/simple-cost-calculation" element={<SimpleCostCalculation caseData={caseData} campDetails={campDetails} username={username} onSubmit={handleFinalSubmit} />} /> {/* Pass username as a prop */}
         <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} isAuthenticated={isAuthenticated} />} />
         <Route path="/customer-dashboard" element={<ProtectedRoute element={<CustomerDashboard />} isAuthenticated={isAuthenticated} />} /> {/* Added route for Customer Dashboard */}
-        <Route path="/newdashboard" element={<NewDashboard/>} />
+        <Route path="/newdashboard" element={<NewDashboard />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </div>
